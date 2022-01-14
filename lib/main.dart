@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
     TodosBloc todoService = TodosBloc(todos: []);
     return BlocProvider(
       create: (context) => todoService,
-      child:  MaterialApp(
-        home: TodosPage(todoStream:todoService.todos),
+      child: MaterialApp(
+        home: TodosPage(),
       ),
     );
   }

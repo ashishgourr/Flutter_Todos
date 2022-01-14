@@ -5,8 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rxdart/rxdart.dart';
 
 class TodosPage extends StatelessWidget {
-  const TodosPage({Key? key, required this.todoStream}) : super(key: key);
-  final ValueStream<List<TodosModel>> todoStream;
+  const TodosPage({
+    Key? key,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -14,49 +16,40 @@ class TodosPage extends StatelessWidget {
         appBar: AppBar(
           title: Text("Todos App"),
         ),
-        body: Center(
-          child: StreamBuilder(
-              stream: todoStream,
-              builder: (context, AsyncSnapshot<List<TodosModel>> snapshot) {
-                if (snapshot.hasError) {
-                  return const Text("Something went wrong");
-                }
-                if (snapshot.hasData) {
-                  final todos = snapshot.data;
-
-                  return (todos ?? []).isEmpty
-                      ? const Text("No todos found")
-                      : ListView.builder(
-                          itemCount: todos != null ? todos.length : 0,
-                          itemBuilder: (context, index) {
-                            final todo = (todos ?? [])[index];
-                            return Card(
-                              margin: const EdgeInsets.all(16.0),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Checkbox(
-                                        value: todo.isComplete,
-                                        onChanged: (value) => BlocProvider.of<
-                                                TodosBloc>(context)
+        body: BlocBuilder<TodosBloc, List<TodosModel>>(
+          builder: (context, todos) {
+            return Center(
+              child: ((todos).isEmpty
+                  ? const Text("No todos found")
+                  : ListView.builder(
+                      itemCount: todos != null ? todos.length : 0,
+                      itemBuilder: (context, index) {
+                        final todo = (todos ?? [])[index];
+                        return Card(
+                          margin: const EdgeInsets.all(16.0),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Checkbox(
+                                    value: todo.isComplete,
+                                    onChanged: (value) =>
+                                        BlocProvider.of<TodosBloc>(context)
                                             .add(UpdateTodos(todoId: todo.id))),
-                                    Text(todo.title),
-                                    IconButton(
-                                        onPressed: () => BlocProvider.of<
-                                                TodosBloc>(context)
+                                Text(todo.title),
+                                IconButton(
+                                    onPressed: () =>
+                                        BlocProvider.of<TodosBloc>(context)
                                             .add(DeleteTodos(todoId: todo.id)),
-                                        icon: const Icon(Icons.delete))
-                                  ],
-                                ),
-                              ),
-                            );
-                          });
-                }
-                return const CircularProgressIndicator();
-              }),
+                                    icon: const Icon(Icons.delete))
+                              ],
+                            ),
+                          ),
+                        );
+                      })),
+            );
+          },
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => BlocProvider.of<TodosBloc>(context).add(AddTodos(
